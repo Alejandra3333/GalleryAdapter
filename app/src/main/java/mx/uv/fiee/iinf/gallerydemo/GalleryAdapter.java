@@ -27,7 +27,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
     @NonNull
     @Override
     public GalleryAdapter.GalleryItemVH onCreateViewHolder (@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from (this.context).inflate (R.layout.gallery_item, parent, false);
+        View view = LayoutInflater.from (context).inflate (R.layout.gallery_item, parent, false);
         return new GalleryItemVH (view);
     }
 
@@ -35,16 +35,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
     public void onBindViewHolder (@NonNull GalleryAdapter.GalleryItemVH holder, int position) {
         Uri image = imageUris.get (position);
         holder.setImage (image);
-        //FUNCION QUE AL DAR CLIC A ALGUNA IMAGEN NOS MANDA A LA VISTA DE "SAVING ACTIVITY"
-        /*holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(holder.itemView.getContext(), SavingActivity.class);
-                //intent.putExtra("list_item", "");
-                holder.itemView.getContext().startActivity(intent);
-            }
-        });
-         */
     }
 
     @Override
@@ -64,5 +54,4 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.GalleryI
             Picasso.get().load (image).into(imageView);
         }
     }
-
 }

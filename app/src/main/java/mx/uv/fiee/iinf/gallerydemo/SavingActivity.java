@@ -1,9 +1,11 @@
 package mx.uv.fiee.iinf.gallerydemo;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -11,34 +13,44 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.location.LocationManager;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 public class SavingActivity extends Activity {
     public static final int REQUEST_CAMERA_OPEN = 4001;
     public static final int REQUEST_PERMISSION_CAMERA = 3001;
     ImageView iv;
+    TextView Longitud,Latitud;
+    LocationManager locat;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView (R.layout.activity_saving);
+
 
         iv = findViewById (R.id.ivSource);
         abrirCamara();
@@ -56,26 +68,51 @@ public class SavingActivity extends Activity {
                 return;
             }
 
-            //abrirCamara ();
-
             Bitmap bitmap = getBitmapFromDrawable (iv.getDrawable ());
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                saveImage (bitmap);
+                saveImage(bitmap);
             } else {
-                String imageDir = Environment.getExternalStoragePublicDirectory (Environment.DIRECTORY_PICTURES).toString ();
-                File file = new File(imageDir, "/mypic.jpg");
-
+                String imageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString();
+                String timeStamp = new SimpleDateFormat("yyyymmdd_hhmmss").format(new Date());
+                File file = new File(imageDir, timeStamp + ".jpeg");
                 try {
-                    OutputStream fos = new FileOutputStream (file);
-                    bitmap.compress (Bitmap.CompressFormat.JPEG, 100, fos);
-                    fos.close ();
+                    OutputStream fos = new FileOutputStream(file);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                    fos.close();
+                    ExifInterface exifInterface = new ExifInterface(file.getPath());
+                    exifInterface.setAttribute(ExifInterface.TAG_GPS_LATITUDE, String.valueOf(Latitud));
+                    exifInterface.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, String.valueOf(Longitud));
+                    exifInterface.saveAttributes();
+                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    Uri contentUri = Uri.fromFile(file);
+                    mediaScanIntent.setData(contentUri);
+                    this.sendBroadcast(mediaScanIntent);
                 } catch (IOException ex) {
                     ex.printStackTrace ();
                 }
             }
-
+            Intent intent = new Intent (this, MainActivity.class);
+            startActivity (intent);
         });
+    }
+
+    void location() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION
+            }, 1000);
+        }
+        Longitud = findViewById(R.id.ivLongitud);
+        Latitud = findViewById(R.id.ivLatitud);
+        locat = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Location loc = locat.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (locat != null) {
+            Log.d("Latitude", String.valueOf(loc.getLatitude()));
+            Log.d("Longitude", String.valueOf(loc.getLongitude()));
+            Longitud.setText("Longitud: " + String.valueOf(loc.getLongitude()));
+            Latitud.setText("Latitud: " + String.valueOf(loc.getLatitude()));
+        }
     }
 
     void abrirCamara () {
@@ -174,6 +211,7 @@ public class SavingActivity extends Activity {
         if (requestCode == REQUEST_CAMERA_OPEN && resultCode == RESULT_OK) {
             Bitmap bitmap = (Bitmap) data.getExtras().get("data");
             iv.setImageBitmap (bitmap);
+            location();
         }
     }
 }

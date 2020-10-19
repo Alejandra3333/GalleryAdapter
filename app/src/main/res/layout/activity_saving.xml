@@ -19,6 +19,18 @@
         android:padding="5dp"
         android:src="@drawable/a3_26" />
 
+    <TextView
+        android:id="@+id/ivLatitud"
+        android:layout_width="164dp"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/ivLongitud"
+        android:layout_width="164dp"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"

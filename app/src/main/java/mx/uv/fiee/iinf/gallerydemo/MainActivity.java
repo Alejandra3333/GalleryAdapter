@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView (R.layout.activity_main);
 
+
         Toolbar toolbar = findViewById (R.id.toolbar);
         setActionBar (Objects.requireNonNull (toolbar));
 
@@ -95,19 +96,6 @@ public class MainActivity extends Activity {
         }
 
         cursor.close ();
-
-
-//        Uri u = (new Uri.Builder ())
-//                .scheme (ContentResolver.SCHEME_ANDROID_RESOURCE)
-//                .authority (getResources().getResourcePackageName (R.drawable.a3_26))
-//                .appendPath (getResources().getResourceTypeName (R.drawable.a3_26))
-//                .appendPath (getResources().getResourceEntryName (R.drawable.a3_26))
-//                .build ();
-//
-//        LinkedList<Uri> imageUris = new LinkedList<> ();
-//        for (int i = 0; i < 100; i++) {
-//            imageUris.add (u);
-//        }
 
         GalleryAdapter adapter = new GalleryAdapter (getBaseContext (), imageUris);
         rv.setAdapter (adapter);
